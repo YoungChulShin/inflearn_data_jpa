@@ -237,4 +237,27 @@ class MemberRepositoryTest {
     public void callCustom() {
         List<Member> result = memberRepository.findMemberCustom();
     }
+
+    @Test
+    public void nativeQuery() {
+
+        // given
+        Team teamA = new Team("teamA");
+        entityManager.persist(teamA);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamA);
+        entityManager.persist(member1);
+        entityManager.persist(member2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> content = result.getContent();
+        for (MemberProjection memberProjection : content) {
+            System.out.println(memberProjection.getUserName());
+            System.out.println(memberProjection.getTeamName());
+        }
+    }
 }
