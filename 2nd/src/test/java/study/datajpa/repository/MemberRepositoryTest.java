@@ -3,6 +3,10 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
@@ -151,5 +155,30 @@ class MemberRepositoryTest {
 
         memberRepository.save(m1);
         memberRepository.save(m2);
+    }
+
+    @Test
+    public void paging() {
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        int offset = 5;
+        int limit = 3;
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        //Page<Member> page = memberRepository.findByAge(age, pageRequest);
+        Slice<Member> sliceByAge = memberRepository.findSliceByAge(age, pageRequest);
+
+
+        assertThat(sliceByAge.getContent().size()).isEqualTo(3);
+        //assertThat(sliceByAge.getTotalElements()).isEqualTo(5);
+        assertThat(sliceByAge.getNumber()).isEqualTo(0);
+        //assertThat(sliceByAge.getTotalPages()).isEqualTo(2);
+        assertThat(sliceByAge.isFirst()).isEqualTo(true);
     }
 }
