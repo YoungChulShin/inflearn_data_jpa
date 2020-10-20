@@ -10,7 +10,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
+import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,19 +28,11 @@ class MemberRepositoryTest {
     @Autowired
     MemberRepository memberRepository;
 
-    @Test
-    public void testMember() {
-        System.out.println("memberrepository = " + memberRepository.getClass());
+    @Autowired
+    TeamRepository teamRepository;
 
-        Member member = new Member("memberA");
-        Member savedMember = memberRepository.save(member);
-
-        Member findMember = memberRepository.findById(savedMember.getId()).get();
-
-        assertThat(findMember.getId()).isEqualTo(member.getId());
-        assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
-        assertThat(findMember).isEqualTo(member);
-    }
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     public void basicCRUD() {
@@ -66,6 +61,20 @@ class MemberRepositoryTest {
 
         long deletedCount = memberRepository.count();
         assertThat(deletedCount).isEqualTo(0);
+    }
+
+    @Test
+    public void testMember() {
+
+        System.out.println("memberrepository = " + memberRepository.getClass());
+        Member member = new Member("memberA");
+        Member savedMember = memberRepository.save(member);
+
+        Member findMember = memberRepository.findById(savedMember.getId()).get();
+
+        assertThat(findMember.getId()).isEqualTo(member.getId());
+        assertThat(findMember.getUsername()).isEqualTo(member.getUsername());
+        assertThat(findMember).isEqualTo(member);
     }
 
     @Test
@@ -156,7 +165,6 @@ class MemberRepositoryTest {
         memberRepository.save(m1);
         memberRepository.save(m2);
     }
-
     @Test
     public void paging() {
         memberRepository.save(new Member("member1", 10));
@@ -193,5 +201,29 @@ class MemberRepositoryTest {
         int resultCount = memberRepository.bulkAgePlus(20);
 
         assertThat(resultCount).isEqualTo(3);
+    }
+
+    @Test
+    public void findMemberLazy() {
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findFetchByUsername("member1");
+
+        for (Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member = " + member.getTeam());
+        }
     }
 }
