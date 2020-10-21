@@ -226,4 +226,9 @@ class MemberRepositoryTest {
             System.out.println("member = " + member.getTeam());
         }
     }
+
+    @Test
+    public void callCustom() {
+        List<Member> memberCustom = memberRepository.findMemberCustom();
+    }
 }

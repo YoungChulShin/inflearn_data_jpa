@@ -12,7 +12,7 @@ import javax.persistence.*;
         name = "Member.findByUsername1",
         query = "select m from Member m where m.username = :username"
 )
-public class Member {
+public class Member extends JpaBaseEntity {
 
     @Id @GeneratedValue
     @Column(name = "member_id")
