@@ -2,6 +2,7 @@ package stud.datajpa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,7 +27,7 @@ public class Member {
 
   private int age;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "team_id") // 이게 foreign key name
   private Team team;
 
@@ -36,6 +37,15 @@ public class Member {
 
   public Member(String username) {
     this.username = username;
+  }
+
+  public Member(String username, int age, Team team) {
+    this.username = username;
+    this.age = age;
+    if (team != null) {
+      changeTeam(team);
+    }
+
   }
 
   public void changeTeam(Team newTeam) {
